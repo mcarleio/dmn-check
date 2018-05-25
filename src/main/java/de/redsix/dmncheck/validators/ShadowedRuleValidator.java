@@ -72,7 +72,7 @@ public class ShadowedRuleValidator extends SimpleValidator<DecisionTable> {
             final InputEntry potentiallySubsumingInput) {
         return FeelParser.parse(input.getTextContent()).bind(inputExpression ->
                 FeelParser.parse(potentiallySubsumingInput.getTextContent()).bind(potentiallySubsumingInputExpression ->
-                        Eithers.left(potentiallySubsumingInputExpression.subsumes(inputExpression))));
+                        Eithers.makeLeft(potentiallySubsumingInputExpression.subsumes(inputExpression))));
     }
 
     private List<Optional<Boolean>> extractSubsumptionResults(

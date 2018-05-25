@@ -126,9 +126,9 @@ public final class FeelParser {
 
     public static Either<FeelExpression, ValidationResult.Builder.ElementStep> parse(final CharSequence charSequence) {
         try {
-            return Eithers.left(PARSER.parse(charSequence));
+            return Eithers.makeLeft(PARSER.parse(charSequence));
         } catch (final ParserException e) {
-            return Eithers.right(ValidationResult.Builder.init.message("Could not parse '" + charSequence + "': " + e.getMessage()));
+            return Eithers.makeRight(ValidationResult.Builder.init.message("Could not parse '" + charSequence + "': " + e.getMessage()));
         }
     }
 }

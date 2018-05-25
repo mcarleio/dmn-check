@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.Optional;
 
-import static de.redsix.dmncheck.util.Eithers.left;
+import static de.redsix.dmncheck.util.Eithers.makeLeft;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FeelTypecheckTest {
@@ -19,7 +19,7 @@ class FeelTypecheckTest {
         final FeelExpression expression = FeelParser.PARSER.parse("");
         final Either<ExpressionType, ValidationResult.Builder.ElementStep> type = FeelTypecheck.typecheck(expression);
 
-        assertEquals(left(ExpressionType.TOP), type);
+        assertEquals(makeLeft(ExpressionType.TOP), type);
     }
 
     @Test
@@ -27,7 +27,7 @@ class FeelTypecheckTest {
         final FeelExpression expression = FeelParser.PARSER.parse("42");
         final Either<ExpressionType, ValidationResult.Builder.ElementStep> type = FeelTypecheck.typecheck(expression);
 
-        assertEquals(left(ExpressionType.INTEGER), type);
+        assertEquals(makeLeft(ExpressionType.INTEGER), type);
     }
 
     @Test
@@ -35,7 +35,7 @@ class FeelTypecheckTest {
         final FeelExpression expression = FeelParser.PARSER.parse("3.14159265359");
         final Either<ExpressionType, ValidationResult.Builder.ElementStep> type = FeelTypecheck.typecheck(expression);
 
-        assertEquals(left(ExpressionType.DOUBLE), type);
+        assertEquals(makeLeft(ExpressionType.DOUBLE), type);
     }
 
     @Test
@@ -44,7 +44,7 @@ class FeelTypecheckTest {
 
         final Either<ExpressionType, ValidationResult.Builder.ElementStep> type = FeelTypecheck.typecheck(expression);
 
-        assertEquals(left(ExpressionType.STRING), type);
+        assertEquals(makeLeft(ExpressionType.STRING), type);
     }
 
     @ParameterizedTest
@@ -54,7 +54,7 @@ class FeelTypecheckTest {
 
         final Either<ExpressionType, ValidationResult.Builder.ElementStep> type = FeelTypecheck.typecheck(expression);
 
-        assertEquals(left(expectedType), type);
+        assertEquals(makeLeft(expectedType), type);
     }
 
     @Test
@@ -63,7 +63,7 @@ class FeelTypecheckTest {
 
         final Either<ExpressionType, ValidationResult.Builder.ElementStep> type = FeelTypecheck.typecheck(expression);
 
-        assertEquals(left(ExpressionType.DATE), type);
+        assertEquals(makeLeft(ExpressionType.DATE), type);
     }
 
     @Test
@@ -74,7 +74,7 @@ class FeelTypecheckTest {
 
         final Either<ExpressionType, ValidationResult.Builder.ElementStep> type = FeelTypecheck.typecheck(context, expression);
 
-        assertEquals(left(ExpressionType.INTEGER), type);
+        assertEquals(makeLeft(ExpressionType.INTEGER), type);
     }
 
     @Test
@@ -93,7 +93,7 @@ class FeelTypecheckTest {
         final FeelExpression expression = FeelParser.PARSER.parse(input);
         final Either<ExpressionType, ValidationResult.Builder.ElementStep> type = FeelTypecheck.typecheck(expression);
 
-        assertEquals(left(expectedType), type);
+        assertEquals(makeLeft(expectedType), type);
     }
 
     @Test
@@ -110,7 +110,7 @@ class FeelTypecheckTest {
         final FeelExpression expression = FeelParser.PARSER.parse("3+4");
         final Either<ExpressionType, ValidationResult.Builder.ElementStep> type = FeelTypecheck.typecheck(expression);
 
-        assertEquals(left(ExpressionType.INTEGER), type);
+        assertEquals(makeLeft(ExpressionType.INTEGER), type);
     }
 
     @Test
@@ -128,7 +128,7 @@ class FeelTypecheckTest {
         final FeelExpression expression = FeelParser.PARSER.parse("<3,>8");
         final Either<ExpressionType, ValidationResult.Builder.ElementStep> type = FeelTypecheck.typecheck(expression);
 
-        assertEquals(left(ExpressionType.INTEGER), type);
+        assertEquals(makeLeft(ExpressionType.INTEGER), type);
     }
 
     @Test
@@ -146,7 +146,7 @@ class FeelTypecheckTest {
         final FeelExpression expression = FeelParser.PARSER.parse("[3..42]");
         final Either<ExpressionType, ValidationResult.Builder.ElementStep> type = FeelTypecheck.typecheck(expression);
 
-        assertEquals(left(ExpressionType.INTEGER), type);
+        assertEquals(makeLeft(ExpressionType.INTEGER), type);
     }
 
     @Test

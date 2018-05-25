@@ -47,13 +47,13 @@ public abstract class TypeValidator extends SimpleValidator<DecisionTable> {
         final Either<ExpressionType, ValidationResult.Builder.ElementStep> typedcheckResult = FeelParser.parse(inputEntry.getTextContent())
                 .bind(feelExpression -> FeelTypecheck.typecheck(context, feelExpression));
 
-        return Eithers.caseOf(typedcheckResult).left(type -> {
+        return Eithers.caseOf(typedcheckResult).makeLeft(type -> {
             if (type.isSubtypeOf(expectedType) || isEmptyAllowed() && ExpressionType.TOP.equals(type)) {
                 return Collections.<ValidationResult.Builder.BuildStep>emptyList();
             } else {
                 return Collections.singletonList(ValidationResult.Builder.init.message(errorMessage()).element(rule));
             }
-        }).right(validationResultBuilder -> Collections.singletonList(validationResultBuilder.element(rule)));
+        }).makeRight(validationResultBuilder -> Collections.singletonList(validationResultBuilder.element(rule)));
     }
 
     @Override

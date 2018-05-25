@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static de.redsix.dmncheck.util.Eithers.left;
+import static de.redsix.dmncheck.util.Eithers.makeLeft;
 
 public final class FeelTypecheck {
 
@@ -27,15 +27,15 @@ public final class FeelTypecheck {
     public static Either<ExpressionType, ValidationResult.Builder.ElementStep> typecheck(final Context context, final FeelExpression expression) {
         return FeelExpressions.caseOf(expression)
                 // FIXME: 12/10/17 The explicit type is needed as otherwise the type of 'right' is lost.
-                .<Either<ExpressionType, ValidationResult.Builder.ElementStep>>Empty(() -> left(ExpressionType.TOP))
-                .BooleanLiteral(bool -> left(ExpressionType.BOOLEAN))
-                .DateLiteral(dateTime -> left(ExpressionType.DATE))
-                .DoubleLiteral(aDouble -> left(ExpressionType.DOUBLE))
-                .IntegerLiteral(integer -> left(ExpressionType.INTEGER))
-                .StringLiteral(string -> left(ExpressionType.STRING))
+                .<Either<ExpressionType, ValidationResult.Builder.ElementStep>>Empty(() -> makeLeft(ExpressionType.TOP))
+                .BooleanLiteral(bool -> makeLeft(ExpressionType.BOOLEAN))
+                .DateLiteral(dateTime -> makeLeft(ExpressionType.DATE))
+                .DoubleLiteral(aDouble -> makeLeft(ExpressionType.DOUBLE))
+                .IntegerLiteral(integer -> makeLeft(ExpressionType.INTEGER))
+                .StringLiteral(string -> makeLeft(ExpressionType.STRING))
                 .VariableLiteral(name ->
                     check(context.containsKey(name), "Variable '" + name + "' has no severity.")
-                    .orElse(left(context.get(name))))
+                    .orElse(makeLeft(context.get(name))))
                 .RangeExpression((__, lowerBound, upperBound, ___) -> typecheckRangeExpression(context, lowerBound, upperBound))
                 .UnaryExpression((operator, operand) -> typecheckUnaryExpression(context, operator, operand))
                 .BinaryExpression((left, operator, right) -> typecheckBinaryExpression(context, left, operator, right))
@@ -47,7 +47,7 @@ public final class FeelTypecheck {
         return typecheck(context, head).bind(headType ->
                 typecheck(context, tail).bind(tailType ->
                     check(headType.equals(tailType), "Types of head and tail do not match.")
-                            .orElse(left(headType))
+                            .orElse(makeLeft(headType))
                 ));
     }
 
@@ -55,7 +55,7 @@ public final class FeelTypecheck {
         return typecheck(context, left).bind(leftType ->
                 typecheck(context, right).bind(rightType ->
                     check(leftType.equals(rightType), "Types of left and right operand do not match.")
-                    .orElse(left(leftType))
+                    .orElse(makeLeft(leftType))
                 ));
     }
 
@@ -64,7 +64,7 @@ public final class FeelTypecheck {
         return typecheck(context, operand).bind(type ->
                     check(allowedOperators.anyMatch(operator::equals), "Operator is not supported in UnaryExpression.").map(Optional::of)
                     .orElseGet(() -> check(ExpressionType.isNumeric(type), "Non-numeric severity in UnaryExpression."))
-                    .orElse(left(type))
+                    .orElse(makeLeft(type))
                 );
     }
 
@@ -75,13 +75,13 @@ public final class FeelTypecheck {
                 typecheck(context, upperBound).bind(upperBoundType ->
                         check(lowerBoundType.equals(upperBoundType), "Types of lower and upper bound do not match.").map(Optional::of)
                         .orElseGet(() -> check(allowedTypes.contains(lowerBoundType), "Type is unsupported for RangeExpressions."))
-                        .orElse(left(lowerBoundType))
+                        .orElse(makeLeft(lowerBoundType))
                 ));
     }
 
     private static Optional<Either<ExpressionType, ValidationResult.Builder.ElementStep>> check(final Boolean condition, final String errorMessage) {
         if (!condition) {
-            return Optional.of(Eithers.right(ValidationResult.Builder.init.message(errorMessage)));
+            return Optional.of(Eithers.makeRight(ValidationResult.Builder.init.message(errorMessage)));
         } else {
             return Optional.empty();
         }
