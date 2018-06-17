@@ -29,7 +29,7 @@ class InputTypeDeclarationValidatorTest extends WithDecisionTable {
         assertEquals(1, validationResults.size());
         final ValidationResult validationResult = validationResults.get(0);
         assertAll(
-                () -> assertEquals("InputExpression has no severity", validationResult.getMessage()),
+                () -> assertEquals("InputExpression has no type", validationResult.getMessage()),
                 () -> assertEquals(inputExpression, validationResult.getElement()),
                 () -> assertEquals(Severity.WARNING, validationResult.getSeverity())
         );
@@ -48,7 +48,26 @@ class InputTypeDeclarationValidatorTest extends WithDecisionTable {
         assertEquals(1, validationResults.size());
         final ValidationResult validationResult = validationResults.get(0);
         assertAll(
-                () -> assertEquals("InputExpression uses an unsupported severity", validationResult.getMessage()),
+                () -> assertEquals("Could not parse FEEL expression type 'unsupportedType'", validationResult.getMessage()),
+                () -> assertEquals(inputExpression, validationResult.getElement()),
+                () -> assertEquals(Severity.ERROR, validationResult.getSeverity())
+        );
+    }
+
+    @Test
+    void shouldDetectThatOutputUsesInternalTypeTOP() {
+        final Input input = modelInstance.newInstance(Input.class);
+        final InputExpression inputExpression = modelInstance.newInstance(InputExpression.class);
+        input.setInputExpression(inputExpression);
+        inputExpression.setTypeRef(" ");
+        decisionTable.getInputs().add(input);
+
+        final List<ValidationResult> validationResults = testee.apply(modelInstance);
+
+        assertEquals(1, validationResults.size());
+        final ValidationResult validationResult = validationResults.get(0);
+        assertAll(
+                () -> assertEquals("TOP is an internal type and cannot be used in declarations.", validationResult.getMessage()),
                 () -> assertEquals(inputExpression, validationResult.getElement()),
                 () -> assertEquals(Severity.ERROR, validationResult.getSeverity())
         );

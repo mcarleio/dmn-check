@@ -12,7 +12,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OutputEntryTypeValidatorTest extends WithDecisionTable {
@@ -87,7 +86,7 @@ class OutputEntryTypeValidatorTest extends WithDecisionTable {
     }
 
     @Test
-    void shouldNotAcceptEmptyExpression() {
+    void shouldAcceptEmptyExpression() {
         final Output output = modelInstance.newInstance(Output.class);
         output.setTypeRef("integer");
         decisionTable.getOutputs().add(output);
@@ -100,7 +99,7 @@ class OutputEntryTypeValidatorTest extends WithDecisionTable {
 
         final List<ValidationResult> validationResults = testee.apply(modelInstance);
 
-        assertFalse(validationResults.isEmpty());
+        assertTrue(validationResults.isEmpty());
     }
 
     @Test
@@ -120,7 +119,7 @@ class OutputEntryTypeValidatorTest extends WithDecisionTable {
         assertEquals(1, validationResults.size());
         final ValidationResult validationResult = validationResults.get(0);
         assertAll(
-                () -> assertEquals("Type of output entry does not match severity of output expression", validationResult.getMessage()),
+                () -> assertEquals("Type of output entry does not match type of output expression", validationResult.getMessage()),
                 () -> assertEquals(rule, validationResult.getElement()),
                 () -> assertEquals(Severity.ERROR, validationResult.getSeverity())
         );

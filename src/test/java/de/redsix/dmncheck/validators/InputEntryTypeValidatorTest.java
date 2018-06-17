@@ -2,6 +2,8 @@ package de.redsix.dmncheck.validators;
 
 import de.redsix.dmncheck.result.ValidationResult;
 import de.redsix.dmncheck.result.Severity;
+import de.redsix.dmncheck.util.ProjectClassLoader;
+import de.redsix.dmncheck.validators.util.TestEnum;
 import de.redsix.dmncheck.validators.util.WithDecisionTable;
 import org.camunda.bpm.model.dmn.instance.Input;
 import org.camunda.bpm.model.dmn.instance.InputEntry;
@@ -134,6 +136,53 @@ class InputEntryTypeValidatorTest extends WithDecisionTable {
     }
 
     @Test
+    void shouldAcceptValidEnumValues() {
+        final Input input = modelInstance.newInstance(Input.class);
+        final InputExpression inputExpression = modelInstance.newInstance(InputExpression.class);
+        input.setInputExpression(inputExpression);
+        inputExpression.setTypeRef(TestEnum.class.getCanonicalName());
+        decisionTable.getInputs().add(input);
+
+        final Rule rule = modelInstance.newInstance(Rule.class);
+        final InputEntry inputEntry = modelInstance.newInstance(InputEntry.class);
+        inputEntry.setTextContent("\"" + TestEnum.some.name() + "\"");
+        rule.getInputEntries().add(inputEntry);
+        decisionTable.getRules().add(rule);
+
+        ProjectClassLoader.instance.classLoader = Thread.currentThread().getContextClassLoader();
+
+        final List<ValidationResult> validationResults = testee.apply(modelInstance);
+
+        assertTrue(validationResults.isEmpty());
+    }
+
+    @Test
+    void shouldNotAcceptInvalidEnumValues() {
+        final Input input = modelInstance.newInstance(Input.class);
+        final InputExpression inputExpression = modelInstance.newInstance(InputExpression.class);
+        input.setInputExpression(inputExpression);
+        inputExpression.setTypeRef(TestEnum.class.getCanonicalName());
+        decisionTable.getInputs().add(input);
+
+        final Rule rule = modelInstance.newInstance(Rule.class);
+        final InputEntry inputEntry = modelInstance.newInstance(InputEntry.class);
+        inputEntry.setTextContent("\"" + TestEnum.some.name() + "unkown\"");
+        rule.getInputEntries().add(inputEntry);
+        decisionTable.getRules().add(rule);
+
+        ProjectClassLoader.instance.classLoader = Thread.currentThread().getContextClassLoader();
+
+        final List<ValidationResult> validationResults = testee.apply(modelInstance);
+
+        assertEquals(1, validationResults.size());
+        final ValidationResult validationResult = validationResults.get(0);
+        assertAll(
+                () -> assertEquals("Value \"" + TestEnum.some.name() + "unkown\" does not belong to " + TestEnum.class.getCanonicalName(), validationResult.getMessage()),
+                () -> assertEquals(rule, validationResult.getElement()),
+                () -> assertEquals(Severity.ERROR, validationResult.getSeverity())
+        );    }
+
+    @Test
     void shouldRejectUnboundVariable() {
         final Input input = modelInstance.newInstance(Input.class);
         final InputExpression inputExpression = modelInstance.newInstance(InputExpression.class);
@@ -153,7 +202,7 @@ class InputEntryTypeValidatorTest extends WithDecisionTable {
         assertEquals(1, validationResults.size());
         final ValidationResult validationResult = validationResults.get(0);
         assertAll(
-                () -> assertEquals("Variable 'x' has no severity.", validationResult.getMessage()),
+                () -> assertEquals("Variable 'x' has no type.", validationResult.getMessage()),
                 () -> assertEquals(rule, validationResult.getElement()),
                 () -> assertEquals(Severity.ERROR, validationResult.getSeverity())
         );
@@ -178,7 +227,7 @@ class InputEntryTypeValidatorTest extends WithDecisionTable {
         assertEquals(1, validationResults.size());
         final ValidationResult validationResult = validationResults.get(0);
         assertAll(
-                () -> assertEquals("Type of input entry does not match severity of input expression", validationResult.getMessage()),
+                () -> assertEquals("Type of input entry does not match type of input expression", validationResult.getMessage()),
                 () -> assertEquals(rule, validationResult.getElement()),
                 () -> assertEquals(Severity.ERROR, validationResult.getSeverity())
         );

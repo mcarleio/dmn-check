@@ -2,10 +2,12 @@ package de.redsix.dmncheck;
 
 import de.redsix.dmncheck.validators.DuplicateRuleValidator;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.MavenProject;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.rules.TemporaryFolder;
@@ -27,6 +29,13 @@ public class CheckerMainTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+    @BeforeEach
+    void setUp() {
+        final MavenProject mavenProject = new MavenProject();
+        mavenProject.setArtifacts(Collections.emptySet());
+        testee.setProject(mavenProject);
+    }
 
     @Test
     void readsAllDmnFilesRecursively() throws IOException {
